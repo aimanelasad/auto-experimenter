@@ -41,7 +41,8 @@ def dataset():
 
 
 @st.cache_data(show_spinner=False)
-def saved_report(path: str) -> FinalReport:
+def saved_report(path: str, stamp: float) -> FinalReport:
+    """stamp is the results file's mtime, so regenerated results are picked up."""
     return load(path)
 
 
@@ -255,7 +256,7 @@ if "live_report" in st.session_state:
         del st.session_state["live_report"]
         st.rerun()
 elif available:
-    report = saved_report(str(available[choice]))
+    report = saved_report(str(available[choice]), (available[choice] / "final.json").stat().st_mtime)
     source_label = f"saved run: {choice}"
 else:
     st.warning("No saved results found. Run `python -m autoexp run` first or start a live run from the sidebar.")
