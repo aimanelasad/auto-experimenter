@@ -105,7 +105,7 @@ def progress_chart(trail: pd.DataFrame, lb: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
     fig.add_scatter(x=idx + idx[::-1], y=list(best + pd.Series(band)) + list((best - pd.Series(band))[::-1]),
                     fill="toself", fillcolor="rgba(31,31,30,0.08)", line={"width": 0}, hoverinfo="skip",
-                    name="incumbent fold std")
+                    name="fold std of the best mean")
     fig.add_scatter(x=idx, y=best, mode="lines", line={"shape": "hv", "color": "#1f1f1e", "width": 2},
                     name="best CV mean so far", hoverinfo="skip")
     for model in FAMILY_COLORS:
