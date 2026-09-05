@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auto-experimenter"
+version = "0.1.0"
+description = "Autonomous experiment loop for churn models: plan, run, judge, narrate."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Aiman El Asad" }]
+dependencies = [
+  "pandas>=2.1", "numpy>=1.26", "scikit-learn>=1.5", "lightgbm>=4.3", "pydantic>=2.6",
+  "anthropic>=0.86", "plotly>=5.22", "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+app = ["streamlit>=1.50"]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["autoexp*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

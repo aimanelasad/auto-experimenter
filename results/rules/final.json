@@ -1,0 +1,262 @@
+{
+ "card": {
+  "name": "IBM Telco Customer Churn",
+  "source_kaggle": "https://www.kaggle.com/datasets/blastchar/telco-customer-churn",
+  "source_file": "https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv",
+  "n_customers": 7043,
+  "n_features": 19,
+  "n_categorical": 15,
+  "n_numeric": 4,
+  "churn_rate": 0.2654,
+  "n_train": 5634,
+  "n_holdout": 1409,
+  "churn_rate_train": 0.2654,
+  "churn_rate_holdout": 0.2654,
+  "holdout_fraction": 0.2,
+  "split_seed": 42
+ },
+ "protocol": "One stratified 80/20 holdout split (seed 42) made once and never used by the loop. Every experiment is scored by 5-fold stratified cross-validation on the train part with identical folds, preprocessing fit inside each fold. Verdicts compare fold by fold against the incumbent (confirmed: mean gain >= 0.002 PR-AUC and paired t >= 2). The incumbent only changes on a confirmed verdict, so the leaderboard's rank 1 by raw mean can differ from the winner. Only the winner is refit on the full train part and scored once on the holdout.",
+ "winner": {
+  "name": "logreg_raw",
+  "model": "logreg",
+  "feature_set": "raw",
+  "params": {
+   "C": 1.0
+  },
+  "class_weight": "none",
+  "calibration": "none",
+  "hypothesis": "Linear baseline sets the floor; the main churn drivers (contract, tenure, charges) are largely additive, so it should already be competitive.",
+  "proposed_by": "rules",
+  "round": 1
+ },
+ "winner_cv": {
+  "pr_auc": 0.6615,
+  "roc_auc": 0.8462,
+  "lift_at_10": 2.8548,
+  "precision_at_10": 0.7575,
+  "recall_at_10": 0.2863,
+  "best_f1": 0.6468,
+  "best_threshold": 0.339,
+  "f1_at_0_5": 0.5926,
+  "brier": 0.1351,
+  "ece": 0.0293,
+  "pr_auc_std": 0.0194
+ },
+ "holdout": {
+  "pr_auc": 0.6338770491467483,
+  "roc_auc": 0.8419902348291095,
+  "lift_at_10": 2.805495505745818,
+  "precision_at_10": 0.7446808510638298,
+  "recall_at_10": 0.2807486631016043,
+  "best_f1": 0.6226012793176972,
+  "best_threshold": 0.2803747291321138,
+  "f1_at_0_5": 0.6060606060606061,
+  "brier": 0.13806345324976588,
+  "ece": 0.025299945403730383
+ },
+ "drivers": [
+  {
+   "feature": "tenure",
+   "importance": 0.23726370594261437,
+   "std": 0.006403968534952541
+  },
+  {
+   "feature": "InternetService",
+   "importance": 0.07838979094711762,
+   "std": 0.018838722911060687
+  },
+  {
+   "feature": "MonthlyCharges",
+   "importance": 0.06281453167897635,
+   "std": 0.01744200548225419
+  },
+  {
+   "feature": "Contract",
+   "importance": 0.039264626930541266,
+   "std": 0.004774969054549269
+  },
+  {
+   "feature": "TotalCharges",
+   "importance": 0.028761528220678123,
+   "std": 0.008363258889333638
+  },
+  {
+   "feature": "StreamingMovies",
+   "importance": 0.013487954901383525,
+   "std": 0.012164571906023278
+  },
+  {
+   "feature": "TechSupport",
+   "importance": 0.011705346060148503,
+   "std": 0.0032260000881285723
+  },
+  {
+   "feature": "OnlineSecurity",
+   "importance": 0.008360144614108656,
+   "std": 0.0036599174454984883
+  },
+  {
+   "feature": "PaymentMethod",
+   "importance": 0.0059173152084407874,
+   "std": 0.0061439824105227955
+  },
+  {
+   "feature": "PhoneService",
+   "importance": 0.005225193626788327,
+   "std": 0.00405497128461356
+  },
+  {
+   "feature": "PaperlessBilling",
+   "importance": 0.0042554525893444325,
+   "std": 0.006308806020320288
+  },
+  {
+   "feature": "DeviceProtection",
+   "importance": 0.00409026890629125,
+   "std": 0.002442831896682572
+  },
+  {
+   "feature": "StreamingTV",
+   "importance": 0.0029135513781563204,
+   "std": 0.004854783217787131
+  },
+  {
+   "feature": "OnlineBackup",
+   "importance": 0.0028512280275950984,
+   "std": 0.0038308774622040106
+  },
+  {
+   "feature": "Dependents",
+   "importance": 0.001291651852027953,
+   "std": 0.004221578792817078
+  },
+  {
+   "feature": "SeniorCitizen",
+   "importance": 0.0002826063367716847,
+   "std": 0.0011162049926509963
+  },
+  {
+   "feature": "Partner",
+   "importance": 7.467717228117898e-05,
+   "std": 0.000686404573571838
+  },
+  {
+   "feature": "gender",
+   "importance": -0.00012701200316396212,
+   "std": 0.0006394080236038291
+  },
+  {
+   "feature": "MultipleLines",
+   "importance": -0.0010452329627113287,
+   "std": 0.007687668149525883
+  }
+ ],
+ "segments": {
+  "Contract": [
+   {
+    "dimension": "Contract",
+    "segment": "Month-to-month",
+    "customers": 3875,
+    "churn_rate": 0.4271
+   },
+   {
+    "dimension": "Contract",
+    "segment": "One year",
+    "customers": 1473,
+    "churn_rate": 0.1127
+   },
+   {
+    "dimension": "Contract",
+    "segment": "Two year",
+    "customers": 1695,
+    "churn_rate": 0.0283
+   }
+  ],
+  "InternetService": [
+   {
+    "dimension": "InternetService",
+    "segment": "Fiber optic",
+    "customers": 3096,
+    "churn_rate": 0.4189
+   },
+   {
+    "dimension": "InternetService",
+    "segment": "DSL",
+    "customers": 2421,
+    "churn_rate": 0.1896
+   },
+   {
+    "dimension": "InternetService",
+    "segment": "No",
+    "customers": 1526,
+    "churn_rate": 0.074
+   }
+  ],
+  "PaymentMethod": [
+   {
+    "dimension": "PaymentMethod",
+    "segment": "Electronic check",
+    "customers": 2365,
+    "churn_rate": 0.4529
+   },
+   {
+    "dimension": "PaymentMethod",
+    "segment": "Mailed check",
+    "customers": 1612,
+    "churn_rate": 0.1911
+   },
+   {
+    "dimension": "PaymentMethod",
+    "segment": "Bank transfer (automatic)",
+    "customers": 1544,
+    "churn_rate": 0.1671
+   },
+   {
+    "dimension": "PaymentMethod",
+    "segment": "Credit card (automatic)",
+    "customers": 1522,
+    "churn_rate": 0.1524
+   }
+  ],
+  "tenure_bucket": [
+   {
+    "dimension": "tenure_bucket",
+    "segment": "0-6",
+    "customers": 1481,
+    "churn_rate": 0.5294
+   },
+   {
+    "dimension": "tenure_bucket",
+    "segment": "7-12",
+    "customers": 705,
+    "churn_rate": 0.3589
+   },
+   {
+    "dimension": "tenure_bucket",
+    "segment": "13-24",
+    "customers": 1024,
+    "churn_rate": 0.2871
+   },
+   {
+    "dimension": "tenure_bucket",
+    "segment": "25-48",
+    "customers": 1594,
+    "churn_rate": 0.2039
+   },
+   {
+    "dimension": "tenure_bucket",
+    "segment": "49+",
+    "customers": 2239,
+    "churn_rate": 0.0951
+   }
+  ]
+ },
+ "retention_meta": {
+  "top_decile_size": 141,
+  "covered": 131,
+  "top_decile_observed_churn_rate": 0.745,
+  "base_churn_rate": 0.265
+ },
+ "narration_source": "template",
+ "narration_usage": {}
+}

@@ -1,0 +1,9 @@
+pandas==2.3.3
+numpy==1.26.4
+scikit-learn==1.7.2
+lightgbm==4.7.0
+pydantic==2.12.3
+anthropic==0.86.0
+streamlit==1.63.0
+plotly==6.7.0
+matplotlib==3.10.6

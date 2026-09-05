@@ -1,0 +1,113 @@
+{
+ "config": {
+  "planner": "rules",
+  "rounds": 5,
+  "per_round": 3,
+  "seed": 42,
+  "n_folds": 5,
+  "patience": 2,
+  "time_limit": 90.0
+ },
+ "stop_reason": "no confirmed gain in 2 consecutive rounds",
+ "seconds": 11.9,
+ "n_rounds": 3,
+ "n_experiments": 10,
+ "n_confirmed": 0,
+ "rounds": [
+  {
+   "round_no": 1,
+   "planner": "rules",
+   "rationale": "No results yet: run one baseline per model family on the raw features to see where each family stands before spending compute on features or tuning.",
+   "note": null,
+   "stop_requested": false,
+   "seconds": 9.2,
+   "usage": {},
+   "results": [
+    {
+     "name": "logreg_raw",
+     "pr_auc": 0.6615043512791037,
+     "delta_vs_incumbent": null,
+     "verdict": "baseline"
+    },
+    {
+     "name": "rf_raw",
+     "pr_auc": 0.6179810362883493,
+     "delta_vs_incumbent": -0.04352,
+     "verdict": "no_gain"
+    },
+    {
+     "name": "hgb_raw",
+     "pr_auc": 0.6360659519630252,
+     "delta_vs_incumbent": -0.02544,
+     "verdict": "no_gain"
+    },
+    {
+     "name": "lgbm_raw",
+     "pr_auc": 0.6407433933530309,
+     "delta_vs_incumbent": -0.02076,
+     "verdict": "no_gain"
+    }
+   ]
+  },
+  {
+   "round_no": 2,
+   "planner": "rules",
+   "rationale": "Round 1 ranked the families logreg, lightgbm, hist_gb, random_forest (incumbent logreg_raw, PR-AUC 0.6615). Next: give the two best families the engineered features, and check whether a seven-column model keeps most of the signal.",
+   "note": null,
+   "stop_requested": false,
+   "seconds": 1.5,
+   "usage": {},
+   "results": [
+    {
+     "name": "logreg_engineered",
+     "pr_auc": 0.6618457159825264,
+     "delta_vs_incumbent": 0.00034,
+     "verdict": "inconclusive"
+    },
+    {
+     "name": "lightgbm_engineered",
+     "pr_auc": 0.6375036890762525,
+     "delta_vs_incumbent": -0.024,
+     "verdict": "no_gain"
+    },
+    {
+     "name": "logreg_minimal",
+     "pr_auc": 0.6456295771208932,
+     "delta_vs_incumbent": -0.01587,
+     "verdict": "no_gain"
+    }
+   ]
+  },
+  {
+   "round_no": 3,
+   "planner": "rules",
+   "rationale": "Incumbent is logreg_raw (PR-AUC 0.6615); best other family is lightgbm. Next: a regularised variant of the incumbent, a strongly regularised lightgbm on the incumbent's feature set (tests whether the family gap is only overfitting at default settings), and class weighting on the incumbent.",
+   "note": null,
+   "stop_requested": false,
+   "seconds": 1.2,
+   "usage": {},
+   "results": [
+    {
+     "name": "logreg_raw_regularised",
+     "pr_auc": 0.6607494210963225,
+     "delta_vs_incumbent": -0.00075,
+     "verdict": "no_gain"
+    },
+    {
+     "name": "lightgbm_raw_regularised",
+     "pr_auc": 0.6590128020733197,
+     "delta_vs_incumbent": -0.00249,
+     "verdict": "no_gain"
+    },
+    {
+     "name": "logreg_raw_balanced",
+     "pr_auc": 0.6599613253518919,
+     "delta_vs_incumbent": -0.00154,
+     "verdict": "no_gain"
+    }
+   ]
+  }
+ ],
+ "usage": {},
+ "cost_usd_estimate": 0.0
+}

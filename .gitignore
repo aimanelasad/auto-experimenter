@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.streamlit/secrets.toml
+results/live/
+*.egg-info/
+.venv/
+build/
+dist/
+submission/
+Schl*ssel*.txt
+*.key
