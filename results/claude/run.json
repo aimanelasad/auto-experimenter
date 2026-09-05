@@ -1,0 +1,123 @@
+{
+ "config": {
+  "planner": "claude",
+  "rounds": 5,
+  "per_round": 3,
+  "seed": 42,
+  "n_folds": 5,
+  "patience": 2,
+  "time_limit": 90.0
+ },
+ "stop_reason": "no confirmed gain in 2 consecutive rounds",
+ "seconds": 58.3,
+ "n_rounds": 3,
+ "n_experiments": 9,
+ "n_confirmed": 0,
+ "rounds": [
+  {
+   "round_no": 1,
+   "planner": "claude",
+   "rationale": "The ledger is empty, so round 1 should establish baselines across model families rather than tune anything. Telco churn is a small, mostly categorical tabular problem where regularised logistic regression is often competitive with boosting, so I test a linear baseline, a well-regularised boosting baseline, and a bagged tree baseline. I vary the feature set slightly (raw vs engineered) to get an early read on whether the engineered columns help, keeping class_weight=none and calibration=none so PR-AUC comparisons are clean.",
+   "note": null,
+   "stop_requested": false,
+   "seconds": 21.8,
+   "usage": {
+    "input_tokens": 4422,
+    "output_tokens": 869,
+    "calls": 1
+   },
+   "results": [
+    {
+     "name": "logreg_raw_baseline",
+     "pr_auc": 0.6615043512791037,
+     "delta_vs_incumbent": null,
+     "verdict": "baseline"
+    },
+    {
+     "name": "lgbm_engineered_reg",
+     "pr_auc": 0.6447541817064103,
+     "delta_vs_incumbent": -0.01675,
+     "verdict": "no_gain"
+    },
+    {
+     "name": "rf_raw_leaf10",
+     "pr_auc": 0.662873273121696,
+     "delta_vs_incumbent": 0.00137,
+     "verdict": "inconclusive"
+    }
+   ]
+  },
+  {
+   "round_no": 2,
+   "planner": "claude",
+   "rationale": "The ledger shows a linear model on raw features leads (0.6615), the regularised LightGBM underperformed (0.6448) and the RF was only inconclusive, suggesting this dataset is largely additive and that boosting so far overfit. Open questions: whether engineered features help a linear model, how much regularisation the linear model wants, and whether a heavily shrunk shallow booster can close the gap. These three experiments probe feature-set value, regularisation strength and a much slower/shallower boosting configuration, one each.",
+   "note": null,
+   "stop_requested": false,
+   "seconds": 19.1,
+   "usage": {
+    "input_tokens": 5031,
+    "output_tokens": 975,
+    "calls": 1
+   },
+   "results": [
+    {
+     "name": "logreg_engineered_C1",
+     "pr_auc": 0.6618457159825264,
+     "delta_vs_incumbent": 0.00034,
+     "verdict": "inconclusive"
+    },
+    {
+     "name": "logreg_raw_C005",
+     "pr_auc": 0.6586081273373698,
+     "delta_vs_incumbent": -0.0029,
+     "verdict": "no_gain"
+    },
+    {
+     "name": "histgb_raw_slow_shallow",
+     "pr_auc": 0.6659876475933953,
+     "delta_vs_incumbent": 0.00448,
+     "verdict": "inconclusive"
+    }
+   ]
+  },
+  {
+   "round_no": 3,
+   "planner": "claude",
+   "rationale": "The ledger shows a tight plateau around 0.662-0.666 across four very different families, with no confirmed gains in two rounds; hist_gb with strong shrinkage/shallow depth is nominally best. What remains open is whether heavier regularisation of the boosters (very small trees, more rounds) or a strongly regularised, lower-dimensional model can push past noise. I propose one further-regularised hist_gb on engineered features, one heavily constrained LightGBM (few leaves, feature subsampling) and one minimal-feature logreg to test whether dimensionality reduction helps ranking.",
+   "note": null,
+   "stop_requested": false,
+   "seconds": 17.3,
+   "usage": {
+    "input_tokens": 5466,
+    "output_tokens": 934,
+    "calls": 1
+   },
+   "results": [
+    {
+     "name": "histgb_eng_slow_deep_iters",
+     "pr_auc": 0.6602014516499078,
+     "delta_vs_incumbent": -0.0013,
+     "verdict": "no_gain"
+    },
+    {
+     "name": "lgbm_raw_tiny_leaves",
+     "pr_auc": 0.665881504469207,
+     "delta_vs_incumbent": 0.00438,
+     "verdict": "inconclusive"
+    },
+    {
+     "name": "logreg_minimal_C3",
+     "pr_auc": 0.6456491146759621,
+     "delta_vs_incumbent": -0.01586,
+     "verdict": "no_gain"
+    }
+   ]
+  }
+ ],
+ "usage": {
+  "input_tokens": 22299,
+  "output_tokens": 4339,
+  "calls": 4
+ },
+ "cost_usd_estimate": 0.22
+}

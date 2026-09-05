@@ -6,7 +6,7 @@ An autonomous experiment loop for churn models. A planner reads the ledger of ev
 
 - Live demo: https://auto-experimenter.streamlit.app (saved run shown instantly; a fresh loop runs in about 20 seconds)
 - Dataset: [IBM Telco Customer Churn on Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn), 7,043 customers, churn rate 26.5 %
-- Two planners with the same interface: a deterministic rules planner (committed run below) and a Claude planner (`claude-opus-5`) whose proposals are validated by code before they run
+- Two planners with the same interface, both runs committed: a deterministic rules planner and a Claude planner (`claude-opus-5`) whose proposals are validated by code before they run
 
 ![Best CV mean over the run](results/rules/figures/progress.png)
 
@@ -30,11 +30,39 @@ Winner on the holdout (scored once): PR-AUC 0.634, ROC-AUC 0.842, lift 2.81 in t
 
 The finding on this dataset: nothing beat the first logistic-regression baseline beyond fold noise, so the loop kept it. `logreg_engineered` has the highest CV mean, but the gain of 0.0003 has a paired t statistic near zero and stays inconclusive. Boosting at default settings overfits (0.618 to 0.641); regularising LightGBM closed most of the gap (0.641 to 0.659 on the same raw features) but not all of it. The loop stopped itself after round 3, once two consecutive rounds had passed without a confirmed gain. Published models on this table reach ROC-AUC around 0.84 to 0.85, which is where every linear variant here lands.
 
-<!-- CLAUDE_RUN_START -->
 ### Rules planner versus Claude planner at equal budget
 
-Not yet committed. `python -m autoexp run --planner claude --narrator claude --out results/claude` produces the Claude run with the same seed, folds, round limit and experiments per round; the comparison table goes here once it has been run.
-<!-- CLAUDE_RUN_END -->
+Same seed, same folds, same round limit (5), same experiments per round (3), same stop rule. The Claude planner (`claude-opus-5`, structured output, proposals validated by code) ran without a single fallback to the rules; the Claude narrator wrote the conclusion in [results/claude/narration.md](results/claude/narration.md).
+
+| | rules planner | Claude planner |
+|---|---|---|
+| experiments / rounds | 10 / 3 | 9 / 3 |
+| confirmed gains | 0 | 0 |
+| best CV mean seen | 0.662, `logreg_engineered` (+0.0003, inconclusive) | 0.666, `histgb_raw_slow_shallow` (+0.0045, inconclusive) |
+| winner kept | `logreg_raw` | `logreg_raw_baseline` (same configuration) |
+| winner on the holdout, PR-AUC | 0.634 | 0.634 |
+| wall time on 2 CPU cores | 12 s | 58 s |
+| model calls / estimated cost | 0 / 0 | 5 / about 0.22 USD |
+
+What the Claude planner did differently: it spent round 1 on three deliberately different configurations (a regularised LightGBM, a random forest with larger leaves, the linear baseline) instead of four library defaults, then went after the one open question the ledger raised, whether a heavily shrunk, shallow booster can match the linear model. Its two boosting variants at 0.666 are configurations the rules planner never tries, and its round-3 rationale read the plateau correctly. Neither planner produced a gain beyond fold noise, and both kept the same baseline, so on this table the difference is in the quality of the hypotheses and the readable trail, not in the score. Round 2 rationale, verbatim:
+
+> The ledger shows a linear model on raw features leads (0.6615), the regularised LightGBM underperformed (0.6448) and the RF was only inconclusive, suggesting this dataset is largely additive and that boosting so far overfit. Open questions: whether engineered features help a linear model, how much regularisation the linear model wants, and whether a heavily shrunk shallow booster can close the gap. These three experiments probe feature-set value, regularisation strength and a much slower/shallower boosting configuration, one each.
+
+![Claude planner run](results/claude/figures/progress.png)
+
+Claude planner trail:
+
+| round | experiment | hypothesis (as proposed) | PR-AUC | delta | verdict |
+|---|---|---|---|---|---|
+| 1 | `logreg_raw_baseline` | A plain L2 logistic regression on one-hot raw features will set a strong reference because Telco churn is largely driven by additive contract, tenure and charge effects. | 0.6615 | | baseline |
+| 1 | `lgbm_engineered_reg` | A shallow, regularised LightGBM on engineered features should match or beat the linear baseline by capturing tenure and charge-ratio interactions without overfitting. | 0.6448 | -0.0168 | no_gain |
+| 1 | `rf_raw_leaf10` | A random forest with min_samples_leaf=10 reveals whether tree ensembles in general beat the linear model here. | 0.6629 | +0.0014 | inconclusive |
+| 2 | `logreg_engineered_C1` | Engineered ratio and count features should raise PR-AUC because they encode interactions the additive raw encoding cannot express. | 0.6618 | +0.0003 | inconclusive |
+| 2 | `logreg_raw_C005` | Stronger L2 plus balanced class weights should stabilise the wide one-hot coefficients and improve ranking of the minority class. | 0.6586 | -0.0029 | no_gain |
+| 2 | `histgb_raw_slow_shallow` | A depth-3, slow-shrinkage, L2-penalised booster should behave closer to an additive model and avoid the overfitting that hurt LightGBM. | 0.6660 | +0.0045 | inconclusive |
+| 3 | `histgb_eng_slow_deep_iters` | The best shallow booster plus engineered features and slower shrinkage should extract the same signal with less variance. | 0.6602 | -0.0013 | no_gain |
+| 3 | `lgbm_raw_tiny_leaves` | The earlier LightGBM failure came from too much capacity; 6-leaf trees, strong L2, column subsampling and balanced weights should recover the 0.665 level. | 0.6659 | +0.0044 | inconclusive |
+| 3 | `logreg_minimal_C3` | Since all models cluster at the same PR-AUC, most signal sits in seven drivers; a low-dimensional logreg should match the baseline with less estimation noise. | 0.6456 | -0.0159 | no_gain |
 
 ## The hypothesis trail
 
@@ -57,7 +85,11 @@ Verdicts compare the experiment with the incumbent on the same five folds: `conf
 
 ## What the narrator wrote
 
-The narrator receives the leaderboard, the trail, the holdout metrics, the permutation drivers and the retention table as JSON and writes five fixed sections. The prompt is in [prompts/narrator.md](prompts/narrator.md) and works standalone on any metrics JSON of that shape; the template narrator in `autoexp/narrator.py` produces the same sections without a model. Full text of the saved run: [results/rules/narration.md](results/rules/narration.md).
+The narrator receives the leaderboard, the trail, the holdout metrics, the permutation drivers and the retention table as JSON and writes five fixed sections. The prompt is in [prompts/narrator.md](prompts/narrator.md) and works standalone on any metrics JSON of that shape; the template narrator in `autoexp/narrator.py` produces the same sections without a model. Full texts: [results/claude/narration.md](results/claude/narration.md) (written by `claude-opus-5`) and [results/rules/narration.md](results/rules/narration.md) (template). Two bullets from the Claude narration, unedited:
+
+> The two nominally best runs, `histgb_raw_slow_shallow` at 0.666 (std 0.021, delta +0.004) and `lgbm_raw_tiny_leaves` at 0.666 (std 0.023, delta +0.004), stayed inconclusive because their gains are well inside a fold spread of about 0.021.
+>
+> Balanced class weights damaged calibration: ECE 0.151 for `logreg_raw_C005` and 0.137 for `lgbm_raw_tiny_leaves`, against 0.029 for the incumbent.
 
 Retention table from the same run (top decile of the holdout by predicted risk, 141 customers, observed churn rate 0.766):
 
@@ -103,7 +135,8 @@ The Claude planner and narrator read `ANTHROPIC_API_KEY` (and `ANTHROPIC_WORKSPA
 autoexp/           the package: data, features, models, metrics, spec, experiments (runner and ledger),
                    planner (rules), planner_claude, llm, loop, retention, narrator, report, figures, __main__
 prompts/           planner.md and narrator.md (the narrator prompt is the standalone challenge-3 artifact)
-results/rules/     saved run: ledger.jsonl, leaderboard.csv, trail.csv, run.json, final.json, narration.md, figures/
+results/rules/     saved rules-planner run: ledger.jsonl, leaderboard.csv, trail.csv, run.json, final.json, narration.md, figures/
+results/claude/    saved Claude-planner run, same layout
 app.py             Streamlit demo
 tests/             pytest suite (data, features, metrics, spec validation, judge, runner, planner, save/load)
 scripts/           screenshots.py, build_submission.py

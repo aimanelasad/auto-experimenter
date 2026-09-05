@@ -12,3 +12,4 @@ submission/
 Schl*ssel*.txt
 *.key
 .claude/
+results/*.log
