@@ -168,9 +168,12 @@ def main() -> int:
 
     if not args.no_pdf:
         pdf_path = docx_path.with_suffix(".pdf")
+        # ExportAsFixedFormat(OutputFileName, ExportFormat=17 (PDF), OpenAfterExport, OptimizeFor, Range,
+        # From, To, Item, IncludeDocProps, KeepIRM, CreateBookmarks, DocStructureTags, BitmapMissingFonts)
         ps = (
             "$w = New-Object -ComObject Word.Application; $w.Visible = $false; "
-            f"$d = $w.Documents.Open('{docx_path}'); $d.ExportAsFixedFormat('{pdf_path}', 17); "
+            f"$d = $w.Documents.Open('{docx_path}'); "
+            f"$d.ExportAsFixedFormat('{pdf_path}', 17, $false, 0, 0, 0, 0, 0, $true, $true, 0, $true, $true); "
             "$d.Close(0); $w.Quit()"
         )
         subprocess.run(["powershell", "-NoProfile", "-Command", ps], check=True)
