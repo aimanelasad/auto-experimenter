@@ -4,7 +4,7 @@
 
 An autonomous experiment loop for churn models. A planner reads the ledger of everything tried so far and proposes the next experiments as testable hypotheses. The runner scores them under one fixed cross-validation protocol. A judge marks each hypothesis confirmed or refuted against the incumbent, fold by fold. A narrator turns the numbers into a short conclusion with next steps and retention actions.
 
-- Live demo: https://auto-experimenter.streamlit.app (saved run shown instantly; a fresh loop runs in about 20 seconds)
+- Live demo: https://auto-experimenter.streamlit.app (saved runs shown instantly; a fresh loop runs in one to two minutes on the free tier, about 15 seconds on a laptop)
 - Dataset: [IBM Telco Customer Churn on Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn), 7,043 customers, churn rate 26.5 %
 - Two planners with the same interface, both runs committed: a deterministic rules planner and a Claude planner (`claude-opus-5`) whose proposals are validated by code before they run
 

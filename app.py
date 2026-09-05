@@ -222,7 +222,7 @@ with st.sidebar:
     if uses_claude:
         st.caption(f"Model calls today: {calls_today()} of {DAILY_CALL_CAP}. This run makes at most {rounds + 1} calls, "
                    "roughly 5 to 15 US cents in total.")
-    duration = "about 20 s" if not uses_claude else "2 to 4 minutes"
+    duration = "1 to 2 minutes" if not uses_claude else "3 to 5 minutes"
     go_live = st.button(f"Run the loop now ({duration})", type="primary", width="stretch")
     st.caption(f"{PER_ROUND} experiments per round, seed {SEED}, same protocol as the saved runs.")
     st.divider()
