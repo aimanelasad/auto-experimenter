@@ -4,7 +4,7 @@
 
 An autonomous experiment loop for churn models. A planner reads the ledger of everything tried so far and proposes the next experiments as testable hypotheses. The runner scores them under one fixed cross-validation protocol. A judge marks each hypothesis confirmed or refuted against the incumbent, fold by fold. A narrator turns the numbers into a short conclusion with next steps and retention actions.
 
-- Live demo: https://huggingface.co/spaces/aimanelasad/auto-experimenter (saved run shown instantly; a fresh loop runs in about 20 seconds)
+- Live demo: https://auto-experimenter.streamlit.app (saved run shown instantly; a fresh loop runs in about 20 seconds)
 - Dataset: [IBM Telco Customer Churn on Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn), 7,043 customers, churn rate 26.5 %
 - Two planners with the same interface: a deterministic rules planner (committed run below) and a Claude planner (`claude-opus-5`) whose proposals are validated by code before they run
 
@@ -78,7 +78,7 @@ python -m pytest -q                                                   # 11 tests
 streamlit run app.py                                                  # the demo, loads results/ on start
 ```
 
-The Claude planner and narrator read `ANTHROPIC_API_KEY` from the environment or from a `.env` file in the project root. Without a key everything falls back to the rules planner and the template narrator and says so. `scripts/deploy_hf_space.py` publishes the app to a Hugging Face Space.
+The Claude planner and narrator read `ANTHROPIC_API_KEY` (and `ANTHROPIC_WORKSPACE_ID` for keys that are not scoped to a workspace) from the environment or from a `.env` file in the project root. Without a key everything falls back to the rules planner and the template narrator and says so. The demo runs on Streamlit Community Cloud straight from this repository (`packages.txt` pulls in the OpenMP runtime LightGBM needs); the `Dockerfile` serves the same app on port 7860 for any container host.
 
 ## Design decisions
 
@@ -88,7 +88,7 @@ The Claude planner and narrator read `ANTHROPIC_API_KEY` from the environment or
 - **No leakage.** One-hot encoding, scaling and feature engineering are steps of a scikit-learn pipeline fit inside every fold. The 11 customers with tenure 0 have blank total charges in the source file; they become 0, and the derived ratios fall back to the monthly charge for them. Calibration experiments use `CalibratedClassifierCV(ensemble=False)` so that the calibrated model is the incumbent plus a monotone mapping rather than a bagged ensemble.
 - **The model proposes, the code validates.** Claude returns a structured object (pydantic schema via the Messages API structured-output mode). Every proposal then passes the same range checks as the rules planner, duplicates of earlier experiments are dropped by a hash of the configuration, and any failure (invalid or truncated output, refusal, network error, daily cap) falls back to the rules planner for that round and is recorded in the run log. A planner that asks to stop is obeyed.
 - **Stopping rule.** The loop stops when the planner says so or after two consecutive rounds without a confirmed gain, whichever comes first.
-- **Cost guard for the public demo.** The Space holds the owner's key: one Claude run per browser session, a soft daily cap on model calls, medium effort for planning calls, and the deterministic path as the default. A full Claude run costs roughly 5 to 15 US cents.
+- **Cost guard for the public demo.** The hosted app holds the owner's key: one Claude run per browser session, a soft daily cap on model calls, medium effort for planning calls, and the deterministic path as the default. A full Claude run costs roughly 5 to 15 US cents.
 - **Boosting is not cut from the search space although it loses here.** Keeping it in and letting the loop refute it is the point: the trail shows why the simpler model was kept.
 
 ## Limitations and what I would do next
@@ -106,7 +106,7 @@ prompts/           planner.md and narrator.md (the narrator prompt is the standa
 results/rules/     saved run: ledger.jsonl, leaderboard.csv, trail.csv, run.json, final.json, narration.md, figures/
 app.py             Streamlit demo
 tests/             pytest suite (data, features, metrics, spec validation, judge, runner, planner, save/load)
-scripts/           deploy_hf_space.py, screenshots.py, build_submission.py
+scripts/           screenshots.py, build_submission.py
 data/              committed copy of the Telco CSV (IBM sample data)
 ```
 

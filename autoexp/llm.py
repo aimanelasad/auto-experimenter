@@ -112,7 +112,11 @@ def _client():
         raise LLMUnavailable("no ANTHROPIC_API_KEY in the environment")
     import anthropic
 
-    return anthropic.Anthropic(max_retries=2)
+    headers = {}
+    workspace = os.environ.get("ANTHROPIC_WORKSPACE_ID")
+    if workspace:  # keys that are not scoped to a workspace must name one per request
+        headers["anthropic-workspace-id"] = workspace
+    return anthropic.Anthropic(max_retries=2, default_headers=headers or None)
 
 
 def _usage_dict(response) -> dict:

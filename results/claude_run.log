@@ -1,0 +1,32 @@
+Dataset: 7043 customers, churn rate 0.265; planner=claude
+
+Round 1 [rules] 4 experiments planned
+  rationale: No results yet: run one baseline per model family on the raw features to see where each family stands before spending compute on features or tuning.
+  note: claude planner unavailable (API error 400: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This API key is not scoped to a workspace, so this request must include the anthropic-workspace-id header with the ID of the workspace to use. Add the header, or use an API key that is scoped to a workspace.'}, 'request_id': None}); used rules for this round
+  logreg_raw                       PR-AUC 0.6615 +- 0.0194  ROC-AUC 0.8462  lift@10% 2.85    0.3s  -> baseline
+  rf_raw                           PR-AUC 0.6180 +- 0.0285  ROC-AUC 0.8238  lift@10% 2.69    3.5s  -> no_gain (-0.0435)
+  hgb_raw                          PR-AUC 0.6361 +- 0.0197  ROC-AUC 0.8313  lift@10% 2.71    5.0s  -> no_gain (-0.0254)
+  lgbm_raw                         PR-AUC 0.6407 +- 0.0173  ROC-AUC 0.8344  lift@10% 2.79    0.9s  -> no_gain (-0.0208)
+
+Round 2 [rules] 3 experiments planned
+  rationale: Round 1 ranked the families logreg, lightgbm, hist_gb, random_forest (incumbent logreg_raw, PR-AUC 0.6615). Next: give the two best families the engineered features, and check whether a seven-column model keeps most of the signal.
+  note: claude planner unavailable (API error 400: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This API key is not scoped to a workspace, so this request must include the anthropic-workspace-id header with the ID of the workspace to use. Add the header, or use an API key that is scoped to a workspace.'}, 'request_id': None}); used rules for this round
+  logreg_engineered                PR-AUC 0.6618 +- 0.0143  ROC-AUC 0.8470  lift@10% 2.85    0.4s  -> inconclusive (+0.0003)
+  lightgbm_engineered              PR-AUC 0.6375 +- 0.0179  ROC-AUC 0.8363  lift@10% 2.74    1.1s  -> no_gain (-0.0240)
+  logreg_minimal                   PR-AUC 0.6456 +- 0.0141  ROC-AUC 0.8407  lift@10% 2.77    0.2s  -> no_gain (-0.0159)
+
+Round 3 [rules] 3 experiments planned
+  rationale: Incumbent is logreg_raw (PR-AUC 0.6615); best other family is lightgbm. Next: a regularised variant of the incumbent, a strongly regularised lightgbm on the incumbent's feature set (tests whether the family gap is only overfitting at default settings), and class weighting on the incumbent.
+  note: claude planner unavailable (API error 400: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This API key is not scoped to a workspace, so this request must include the anthropic-workspace-id header with the ID of the workspace to use. Add the header, or use an API key that is scoped to a workspace.'}, 'request_id': None}); used rules for this round
+  logreg_raw_regularised           PR-AUC 0.6607 +- 0.0190  ROC-AUC 0.8455  lift@10% 2.83    0.3s  -> no_gain (-0.0008)
+  lightgbm_raw_regularised         PR-AUC 0.6590 +- 0.0209  ROC-AUC 0.8431  lift@10% 2.87    1.1s  -> no_gain (-0.0025)
+  logreg_raw_balanced              PR-AUC 0.6600 +- 0.0196  ROC-AUC 0.8459  lift@10% 2.85    0.3s  -> no_gain (-0.0015)
+
+Stopped: no confirmed gain in 2 consecutive rounds
+
+Loop finished in 16.3s: no confirmed gain in 2 consecutive rounds; 10 experiments
+
+Winner: logreg_raw = logreg / raw / C=1
+  CV PR-AUC 0.6615 +- 0.0194; holdout PR-AUC 0.6339, ROC-AUC 0.8420, lift@10% 2.81
+Narration by template; usage {} (about $0.000)
+Written: results\claude\leaderboard.csv, results\claude\trail.csv, results\claude\retention.csv, results\claude\run.json, results\claude\final.json, results\claude\narration.md

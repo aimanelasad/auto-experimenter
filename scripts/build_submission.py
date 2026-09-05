@@ -1,6 +1,6 @@
 """Build the submission document (DOCX, then PDF via Word) for the application form.
 
-    python scripts/build_submission.py --space https://huggingface.co/spaces/<user>/auto-experimenter
+    python scripts/build_submission.py --space https://auto-experimenter.streamlit.app
 
 Reads the saved runs under results/ and the screenshots under submission/screenshots/.
 """
@@ -73,7 +73,7 @@ def add_table(doc: Document, header: list[str], rows: list[list[str]]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--space", default="https://huggingface.co/spaces/aimanelasad/auto-experimenter")
+    parser.add_argument("--space", default="https://auto-experimenter.streamlit.app")
     parser.add_argument("--no-pdf", action="store_true")
     args = parser.parse_args()
     OUT_DIR.mkdir(exist_ok=True)
@@ -95,7 +95,7 @@ def main() -> int:
     doc.add_paragraph(f"{AUTHOR}, {date.today().strftime('%d %B %Y')}. Challenge 2 of the optional AI challenge.")
 
     doc.add_heading("Links", level=2)
-    for label, url in [("Prototype (Hugging Face Space)", args.space), ("Code, results and design notes (GitHub)", REPO),
+    for label, url in [("Prototype (Streamlit Community Cloud)", args.space), ("Code, results and design notes (GitHub)", REPO),
                        ("Dataset (Kaggle, IBM Telco Customer Churn)", KAGGLE)]:
         p = doc.add_paragraph(style="List Bullet")
         p.add_run(f"{label}: ").bold = True
